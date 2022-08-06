@@ -7,12 +7,12 @@ import uuid
 from urllib.parse import urlencode, unquote
 from sys import exit
 
-min_won = 5003
+min_won = 5001
 time_over = False
-
+local_time = datetime.datetime.now()
 def place_order(ask_price):
-    access_key = 'pm8Wr9esDOsSK77zglbuFPAWxG1WekQEEuOiWWr5'
-    secret_key = 'bgJVGbssqZFrYFCM18bWANnl2p1IAIGLuxlJnl5B'
+    access_key = ''
+    secret_key = ''
     server_url = 'https://api.upbit.com'
 
     params = {
@@ -40,36 +40,42 @@ def place_order(ask_price):
     headers = {
       'Authorization': authorization,
     }
-
+    time1 = datetime.datetime.now()
+    print("time1 =" + str(time1))
     res = requests.post(server_url + '/v1/orders', json=params, headers=headers)
+    time2 = datetime.datetime.now()
+    print("time2 =" + str(time2))
+    
+    print(time2 - time1)
     res.json()
-    print(res.json())
-    print(datetime.datetime.now())
+    print(res.json()["created_at"])
 
-def ticker_info():
-    time_stamp = 0
-    url = "https://api.upbit.com/v1/orderbook?markets=KRW-BTT"
-
-    headers = {"Accept": "application/json"}
-
-    response = requests.get(url, headers=headers)
-    response.encoding = 'utf-8-sig'
-    time_stamp = response.json()[0]['timestamp']
-    server_time = datetime.datetime.fromtimestamp(time_stamp/1000)
-    return server_time
+#def ticker_info():
+#    time_stamp = 0
+#    url = "https://api.upbit.com/v1/orderbook?markets=KRW-BTT"
+#
+#    headers = {"Accept": "application/json"}
+#
+#    response = requests.get(url, headers=headers)
+#    response.encoding = 'utf-8-sig'
+#    time_stamp = response.json()[0]['timestamp']
+##    print(time_stamp)
+#    server_time = datetime.datetime.fromtimestamp(time_stamp/1000)
+#    print("A upbit time is: " + str(server_time))
+#    print("B local time is: " + str(local_time))
+#
+#    return server_time
 
 try:
     while True:
-        upbit_server_time = ticker_info()
-        hr = upbit_server_time.hour
-        min = upbit_server_time.minute
-        second = upbit_server_time.second
-        ms = upbit_server_time.microsecond
-        print(upbit_server_time)
-        if ms > 990000:
-            print(ms)
-        
-        if hr == 8 and min == 59 and second >= 59 and ms == 900000:
+        ref_time = datetime.datetime.now()
+        hr = ref_time.hour
+        min = ref_time.minute
+        second = ref_time.second
+        ms = ref_time.microsecond
+        print("C upbit time is: " + str(ref_time))
+
+        if hr == 8 and min == 59 and second >= 59 and ms == 650000:
             url1 = "https://api.upbit.com/v1/trades/ticks?market=KRW-BTT&count=1"
             headers1 = {"Accept": "application/json"}
             response1 = requests.get(url1, headers=headers1)
@@ -83,7 +89,6 @@ try:
             response2 = requests.get(url2, headers=headers2)
             data2 = response2.json()
             ask_price =data2[0]["orderbook_units"][0]["ask_price"]
-
             if last_price == ask_price:
                 print("UP")
             else:
